@@ -31,10 +31,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Lista de etiquetas de personas
   final List<Map<String, String>> etiquetas = [
-    {"nombre": "Juan Pérez", "info": "Cliente frecuente, tiene 5 compras."},
-    {"nombre": "María López", "info": "Cliente nuevo, primera compra."},
-    {"nombre": "Carlos Gómez", "info": "Cliente VIP, historial de 10 compras."},
-    {"nombre": "Ana Torres", "info": "Cliente registrado desde 2020."},
+    {"nombre": "Juan Pérez", "tipo": "Cliente frecuente"},
+    {"nombre": "María López", "tipo": "Cliente nuevo"},
+    {"nombre": "Carlos Gómez", "tipo": "Cliente VIP"},
+    {"nombre": "Ana Torres", "tipo": "Cliente registrado desde 2020"},
   ];
 
   // Método para mostrar la ventana flotante con información
@@ -193,14 +193,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                 return Card(
                                   margin: EdgeInsets.symmetric(vertical: 8),
                                   child: ListTile(
-                                    title: Text(etiquetas[index]['nombre']!,
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold)),
-                                    subtitle: Text(etiquetas[index]['info']!),
-                                    onTap: () => mostrarInformacion(
-                                        context,
-                                        etiquetas[index]['nombre']!,
-                                        etiquetas[index]['info']!),
+                                    title: Text(
+                                      etiquetas[index]['nombre']!,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    subtitle: Text(etiquetas[index]['tipo']!),
+                                    onTap: () => mostrarOpcionesPago(
+                                        context, etiquetas[index]['nombre']!),
                                   ),
                                 );
                               },
@@ -236,6 +236,88 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               Navigator.pop(context);
               toggleMenu();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void mostrarOpcionesPago(BuildContext context, String nombre) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Opciones de pago para $nombre"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text("Depósito a cuenta"),
+              onTap: () {
+                Navigator.pop(context);
+                ingresarMonto(context, nombre, "Depósito a cuenta", true);
+              },
+            ),
+            ListTile(
+              title: Text("Pago de préstamo"),
+              onTap: () {
+                Navigator.pop(context);
+                ingresarMonto(context, nombre, "Pago de préstamo", false);
+              },
+            ),
+            ListTile(
+              title: Text("Pago de inversión"),
+              onTap: () {
+                Navigator.pop(context);
+                ingresarMonto(context, nombre, "Pago de inversión", false);
+              },
+            ),
+            ListTile(
+              title: Text("Pago de seguro"),
+              onTap: () {
+                Navigator.pop(context);
+                ingresarMonto(context, nombre, "Pago de seguro", false);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void ingresarMonto(
+      BuildContext context, String nombre, String tipo, bool editable) {
+    TextEditingController montoController = TextEditingController();
+
+    if (!editable) {
+      // Si no es editable, asignamos un monto predefinido (ejemplo)
+      montoController.text = tipo == "Pago de préstamo"
+          ? "3200"
+          : tipo == "Pago de inversión"
+              ? "10000"
+              : "800"; // Pago de seguro
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Ingrese el monto"),
+        content: TextField(
+          controller: montoController,
+          keyboardType: TextInputType.number,
+          enabled: editable, // Solo editable si es depósito
+          decoration: InputDecoration(labelText: "Monto en \$"),
+        ),
+        actions: [
+          TextButton(
+            child: Text("Cancelar"),
+            onPressed: () => Navigator.pop(context),
+          ),
+          TextButton(
+            child: Text("Confirmar"),
+            onPressed: () {
+              // Aquí puedes enviar el monto ingresado a la base de datos o procesarlo
+              Navigator.pop(context);
             },
           ),
         ],
