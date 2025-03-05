@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());
@@ -234,8 +236,7 @@ class _HomeScreenState extends State<HomeScreen> {
           TextButton(
             child: Text("Salir", style: TextStyle(color: Colors.red)),
             onPressed: () {
-              Navigator.pop(context);
-              toggleMenu();
+              exit(0);
             },
           ),
         ],
