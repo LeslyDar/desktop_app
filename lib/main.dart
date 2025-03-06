@@ -1,14 +1,24 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() => runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'https://wvjzrcwwxhdigsazxgzk.supabase.co',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind2anpyY3d3eGhkaWdzYXp4Z3prIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMjA2NDQsImV4cCI6MjA1Njc5NjY0NH0.1s0g-t5ByTWQHA46BT4JXB8bXWLjohZ6ZdW718O8He0',
+  );
+
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Material App',
+      title: 'Sistema Bancario',
       debugShowCheckedModeBanner: false,
       home: HomeScreen(),
     );
@@ -23,6 +33,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool _showMenu = false;
   double _menuWidth = 0;
+
+  String Seleccion = 'Seleccione';
 
   void toggleMenu() {
     setState(() {
@@ -39,24 +51,6 @@ class _HomeScreenState extends State<HomeScreen> {
     {"nombre": "Ana Torres", "tipo": "Cliente registrado desde 2020"},
   ];
 
-  // Método para mostrar la ventana flotante con información
-  void mostrarInformacion(
-      BuildContext context, String titulo, String contenido) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(titulo),
-        content: Text(contenido),
-        actions: [
-          TextButton(
-            child: Text("Cerrar"),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,44 +58,14 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Row(
             children: [
-              // ----------------- MENÚ DESLIZANTE (IZQUIERDA) -----------------
-              AnimatedContainer(
-                duration: Duration(milliseconds: 300),
-                width: _menuWidth,
-                height: double.infinity,
-                color: Color.fromARGB(255, 100, 94, 94),
-                child: _showMenu
-                    ? Padding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Menú",
-                                style: TextStyle(
-                                    fontSize: 20, color: Colors.white)),
-                            Divider(),
-                            TextButton(
-                              onPressed: () => _confirmLogout(context),
-                              child: Text("Cerrar Sesión",
-                                  style: TextStyle(color: Colors.white)),
-                            ),
-                          ],
-                        ),
-                      )
-                    : SizedBox(),
-              ),
-
-              // ----------------- CUERPO PRINCIPAL -----------------
               Expanded(
                 child: Column(
                   children: [
-                    // ----------------- APP BAR -----------------
                     Container(
                       decoration: BoxDecoration(
                         color: Color(0xFF4E332E),
                         borderRadius:
-                            BorderRadius.only(topRight: Radius.circular(20)),
+                            BorderRadius.only(topLeft: Radius.circular(20)),
                       ),
                       padding:
                           EdgeInsets.symmetric(horizontal: 20, vertical: 15),
@@ -150,6 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               Container(
                                 width: 150,
                                 child: DropdownButtonFormField<String>(
+                                  hint: Text(Seleccion),
                                   decoration: InputDecoration(
                                     filled: true,
                                     fillColor: Colors.white,
@@ -158,16 +123,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                   items: [
                                     DropdownMenuItem(
-                                        value: 'Option 1',
-                                        child: Text('Option 1')),
+                                        value: 'Préstamos',
+                                        child: Text('Préstamos')),
                                     DropdownMenuItem(
-                                        value: 'Option 2',
-                                        child: Text('Option 2')),
+                                        value: 'Inversión',
+                                        child: Text('Inversión')),
                                     DropdownMenuItem(
-                                        value: 'Option 3',
-                                        child: Text('Option 3')),
+                                        value: 'Seguros',
+                                        child: Text('Seguros')),
                                   ],
-                                  onChanged: (value) {},
+                                  onChanged: (value) {
+                                    Seleccion = value.toString();
+                                  },
                                 ),
                               ),
                               SizedBox(width: 10),
@@ -214,7 +181,53 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
+
+              // ----------------- MENÚ DESLIZANTE (DERECHA) -----------------
+              AnimatedContainer(
+                duration: Duration(milliseconds: 300),
+                width: _menuWidth,
+                height: double.infinity,
+                color: Color.fromARGB(255, 82, 59, 59),
+                child: _showMenu
+                    ? Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Menú",
+                                style: TextStyle(
+                                    fontSize: 20, color: Colors.white)),
+                            Divider(),
+                            TextButton(
+                              onPressed: () => _confirmLogout(context),
+                              child: Text("Cerrar Sesión",
+                                  style: TextStyle(color: Colors.white)),
+                            ),
+                          ],
+                        ),
+                      )
+                    : SizedBox(),
+              ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+// Método para mostrar la ventana flotante con información
+  void mostrarInformacion(
+      BuildContext context, String titulo, String contenido) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(titulo),
+        content: Text(contenido),
+        actions: [
+          TextButton(
+            child: Text("Cerrar"),
+            onPressed: () => Navigator.pop(context),
           ),
         ],
       ),
